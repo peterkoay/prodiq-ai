@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prodiq.ai — AI-Augmented Product Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0D1117;
+    --bg2: #161B22;
+    --bg3: #1E242D;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(245,166,35,0.28);
+    --gold: #F5A623;
+    --gold-dim: rgba(245,166,35,0.10);
+    --gold-mid: rgba(245,166,35,0.32);
+    --text: #E8EDF2;
+    --muted: #8B95A3;
+    --muted2: #5A6470;
+    --red: #FF6B6B;
+    --teal: #00C9A7;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2.5rem;
+    background: rgba(13,17,23,0.92);
+    border-bottom: 0.5px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: -0.02em;
+  }
+  .nav-brand span { color: var(--muted); }
+
+  nav a.nav-link {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-left: 2rem;
+    transition: color 0.2s;
+  }
+  nav a.nav-link:hover { color: var(--text); text-decoration: none; }
+
+  .hero {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 6rem 2.5rem 5rem;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+  }
+
+  /* BACKLOG DEMO */
+  .backlog-demo {
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    margin-bottom: 3rem;
+    overflow: hidden;
+  }
+
+  .demo-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .demo-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted2);
+  }
+
+  .demo-badge {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-thinking {
+    background: rgba(245,166,35,0.12);
+    border: 0.5px solid rgba(245,166,35,0.3);
+    color: var(--gold);
+  }
+
+  .badge-done {
+    background: rgba(0,201,167,0.1);
+    border: 0.5px solid rgba(0,201,167,0.25);
+    color: var(--teal);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 0.5px solid var(--border);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .item:last-child { border-bottom: none; }
+
+  .item-rank {
+    font-size: 0.72rem;
+    color: var(--muted2);
+    min-width: 1.5rem;
+    padding-top: 0.05rem;
+  }
+
+  .item-rank.promoted { color: var(--gold); }
+  .item-rank.deprioted { color: var(--red); }
+
+  .item-text { flex: 1; color: var(--muted); line-height: 1.5; }
+  .item-text strong { color: var(--text); font-weight: 500; display: block; margin-bottom: 0.1rem; }
+
+  .item-tag {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 0.1rem;
+  }
+
+  .tag-p1 { background: rgba(255,107,107,0.12); color: var(--red); border: 0.5px solid rgba(255,107,107,0.25); }
+  .tag-p2 { background: rgba(245,166,35,0.10); color: var(--gold); border: 0.5px solid rgba(245,166,35,0.25); }
+  .tag-p3 { background: rgba(139,149,163,0.10); color: var(--muted); border: 0.5px solid rgba(139,149,163,0.2); }
+
+  .demo-insight {
+    margin-top: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--gold-dim);
+    border-left: 2px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .demo-insight span { color: var(--gold); }
+
+  .hero h1 {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.75;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-cta-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.7rem 1.6rem;
+    background: var(--gold);
+    color: #0D1117;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.88; text-decoration: none; transform: translateY(-1px); }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 0.7rem 1.4rem;
+    border: 0.5px solid var(--border2);
+    color: var(--gold);
+    font-size: 0.9rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .btn-ghost:hover { background: var(--gold-dim); text-decoration: none; }
+
+  .outcome-bar {
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg2);
+    padding: 2rem 2.5rem;
+  }
+
+  .outcome-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .outcome-stat {
+    padding: 0 2rem 0 0;
+    border-right: 0.5px solid var(--border);
+  }
+  .outcome-stat:last-child { border-right: none; padding-right: 0; padding-left: 2rem; }
+  .outcome-stat:first-child { padding-left: 0; }
+
+  .outcome-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .outcome-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 5rem 2.5rem;
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  .section-intro {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 3rem;
+  }
+
+  .problem-quote {
+    border-left: 2px solid var(--gold);
+    padding: 1.25rem 1.5rem;
+    background: var(--gold-dim);
+    border-radius: 0 6px 6px 0;
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .problem-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.25rem 1.25rem 1rem;
+    border-left: 2px solid var(--red);
+  }
+
+  .problem-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+  .problem-card strong { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text); margin-bottom: 0.4rem; }
+
+  /* AGENTS GRID */
+  .agent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .agent-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .agent-card:hover { border-color: var(--gold-mid); }
+
+  .agent-index {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+
+  .agent-card h3 { font-size: 0.95rem; font-weight: 500; color: var(--text); margin-bottom: 0.5rem; }
+  .agent-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+
+  /* ORCHESTRATOR */
+  .orch-block {
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: 10px;
+    padding: 2rem 2.5rem;
+    margin-top: 2rem;
+  }
+
+  .orch-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+
+  .orch-block p { font-size: 0.9rem; color: var(--muted); line-height: 1.75; }
+
+  /* OUTCOME STORY */
+  .outcome-story {
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: 10px;
+    padding: 2.5rem;
+  }
+
+  .outcome-story-headline {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .outcome-story p { font-size: 0.95rem; color: var(--muted); max-width: 580px; line-height: 1.75; margin-bottom: 1.5rem; }
+
+  .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+
+  .compare-col { padding: 1rem 1.25rem; border-radius: 6px; }
+  .compare-col.before { background: rgba(255,107,107,0.07); border: 0.5px solid rgba(255,107,107,0.2); }
+  .compare-col.after { background: var(--gold-dim); border: 0.5px solid var(--gold-mid); }
+
+  .compare-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    font-weight: 400;
+  }
+  .compare-col.before .compare-label { color: var(--red); }
+  .compare-col.after .compare-label { color: var(--gold); }
+
+  .compare-col ul { list-style: none; padding: 0; }
+  .compare-col ul li {
+    font-size: 0.85rem;
+    color: var(--muted);
+    padding: 0.3rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.5;
+  }
+  .compare-col ul li::before { flex-shrink: 0; margin-top: 0.25rem; font-size: 0.7rem; }
+  .compare-col.before ul li::before { content: "×"; color: var(--red); }
+  .compare-col.after ul li::before { content: "✓"; color: var(--gold); }
+
+  /* SIBLING */
+  .sibling-bar {
+    border-top: 0.5px solid var(--border);
+    background: var(--bg2);
+    padding: 2rem 2.5rem;
+  }
+
+  .sibling-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .sibling-text p { font-size: 0.9rem; color: var(--muted); max-width: 480px; line-height: 1.7; }
+  .sibling-text strong { color: var(--text); font-weight: 500; display: block; margin-bottom: 0.35rem; font-size: 0.95rem; }
+
+  .sibling-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    border: 0.5px solid rgba(0,201,167,0.3);
+    color: var(--teal);
+    font-size: 0.9rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .sibling-link:hover { background: rgba(0,201,167,0.08); text-decoration: none; }
+
+  /* ABOUT */
+  .about-block { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+
+  .about-text p { font-size: 0.95rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
+
+  .about-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.3rem 0.75rem;
+    background: var(--gold-dim);
+    border: 0.5px solid var(--gold-mid);
+    color: var(--gold);
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  .about-meta {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.6rem 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-key { color: var(--muted2); font-size: 0.8rem; }
+  .meta-val { color: var(--text); text-align: right; max-width: 60%; }
+
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 2.5rem;
+    text-align: center;
+  }
+  footer p { font-size: 0.82rem; color: var(--muted2); line-height: 1.7; }
+
+  .fade-in { opacity: 0; transform: translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 640px) {
+    .about-block { grid-template-columns: 1fr; }
+    .compare-row { grid-template-columns: 1fr; }
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { display: none; }
+    .hero, section { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .outcome-stat { border-right: none; padding: 0; }
+    .outcome-stat:last-child { padding-left: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">prodiq<span>.ai</span></span>
+  <div class="nav-links">
+    <a href="#problem" class="nav-link">Problem</a>
+    <a href="#how" class="nav-link">How it works</a>
+    <a href="#outcome" class="nav-link">Outcomes</a>
+    <a href="#about" class="nav-link">About</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Product Management · AI-Augmented · Built in production</div>
+
+  <div class="backlog-demo" id="demo" aria-label="prodiq.ai backlog prioritisation demo" role="img">
+    <div class="demo-header">
+      <span class="demo-label">Sprint backlog — Q2 planning</span>
+      <span class="demo-badge badge-thinking" id="badge-thinking">prodiq.ai analysing...</span>
+      <span class="demo-badge badge-done" id="badge-done">Prioritisation complete</span>
+    </div>
+
+    <div class="item" id="item1">
+      <span class="item-rank promoted">↑ 1</span>
+      <div class="item-text">
+        <strong>Device attestation provisioning — pre-migration gate</strong>
+        Ensure DRM credentials provisioned before subscriber migration window opens
+      </div>
+      <span class="item-tag tag-p1">P1 · Blocker</span>
+    </div>
+    <div class="item" id="item2">
+      <span class="item-rank promoted">↑ 2</span>
+      <div class="item-text">
+        <strong>WPE session state transplant — LSM verification</strong>
+        Validate local storage migration for returning subscribers on new platform
+      </div>
+      <span class="item-tag tag-p1">P1 · Migration</span>
+    </div>
+    <div class="item" id="item3">
+      <span class="item-rank">  3</span>
+      <div class="item-text">
+        <strong>Multi-room partial migration — edge case coverage</strong>
+        Test coverage for households with mixed old/new STB configurations
+      </div>
+      <span class="item-tag tag-p2">P2 · Coverage</span>
+    </div>
+    <div class="item" id="item4">
+      <span class="item-rank deprioted">↓ 4</span>
+      <div class="item-text">
+        <strong>UI component refresh — channel grid tiles</strong>
+        Visual update to channel grid — no subscriber impact
+      </div>
+      <span class="item-tag tag-p3">P3 · Deferred</span>
+    </div>
+
+    <div class="demo-insight" id="insight">
+      <span>prodiq.ai insight:</span> Items 1–2 promoted — migration gate dependency detected. UI refresh deprioritised: zero subscriber-impact risk. Sprint capacity: 87% allocated to migration-critical stories.
+    </div>
+  </div>
+
+  <h1>Product decisions made<br>with <em>signal, not instinct.</em></h1>
+  <p class="hero-sub">prodiq.ai is an AI-augmented product management framework that turns backlog noise into prioritised, evidence-backed decisions — so product teams ship what matters, faster.</p>
+
+  <div class="hero-cta-row">
+    <a href="https://www.linkedin.com/in/peterkoay" class="btn-primary" target="_blank" rel="noopener">Read the framework →</a>
+    <a href="#outcome" class="btn-ghost">See the outcome data</a>
+  </div>
+</div>
+
+<div class="outcome-bar fade-in">
+  <div class="outcome-inner">
+    <div class="outcome-stat">
+      <span class="outcome-number">30%</span>
+      <span class="outcome-label">Fewer escaped defects<br>in milestone releases</span>
+    </div>
+    <div class="outcome-stat">
+      <span class="outcome-number">6</span>
+      <span class="outcome-label">AI agents in the<br>orchestration pipeline</span>
+    </div>
+    <div class="outcome-stat">
+      <span class="outcome-number">5.3M</span>
+      <span class="outcome-label">Subscribers on the<br>platform it runs on</span>
+    </div>
+    <div class="outcome-stat">
+      <span class="outcome-number">10+</span>
+      <span class="outcome-label">OTT streaming partners<br>managed in scope</span>
+    </div>
+  </div>
+</div>
+
+<section id="problem" class="fade-in">
+  <div class="section-eyebrow">The problem</div>
+  <h2>Product teams are drowning in signal.<br>Decisions default to loudest voice.</h2>
+  <p class="section-intro">In complex multi-platform, multi-partner environments, product decisions are made under time pressure with incomplete context. The backlog grows. Sprint velocity drops. The wrong things ship first.</p>
+
+  <div class="problem-quote">
+    "We have 200 items in the backlog, three stakeholder groups with competing priorities, two platform vendors, and a migration deadline. The question isn't what to build — it's what to build next, and why, with evidence that holds up in a room full of people who disagree."
+  </div>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <strong>Priority drift</strong>
+      <p>Without systematic signal analysis, sprint priorities shift based on recency bias and stakeholder volume — not subscriber impact or dependency risk.</p>
+    </div>
+    <div class="problem-card">
+      <strong>Context overload</strong>
+      <p>PMs synthesise JIRA, vendor release notes, platform logs, and partner SLAs manually. Critical connections between items go undetected until sprint review.</p>
+    </div>
+    <div class="problem-card">
+      <strong>Decision debt</strong>
+      <p>Deferred decisions accumulate. Teams enter planning with unresolved dependencies, blocker chains, and sprint commitments that don't survive first contact with engineering.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="fade-in">
+  <div class="section-eyebrow">How it works</div>
+  <h2>Five pillars. Six agents.<br>One product intelligence layer.</h2>
+  <p class="section-intro">prodiq.ai embeds AI agents across five product management disciplines, orchestrated into a single decision-support pipeline — from signal ingestion to sprint-ready output.</p>
+
+  <div class="agent-grid">
+    <div class="agent-card">
+      <div class="agent-index">PILLAR 01</div>
+      <h3>Signal aggregation</h3>
+      <p>Ingests backlog, JIRA epics, release notes, vendor advisories, and partner integration status. Structures fragmented input for AI analysis.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-index">PILLAR 02</div>
+      <h3>Dependency mapping</h3>
+      <p>AI agents trace cross-item dependency chains — surfacing hidden blockers, migration gates, and sequencing constraints before sprint planning starts.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-index">PILLAR 03</div>
+      <h3>Priority recommendation</h3>
+      <p>Evidence-backed prioritisation ranked by subscriber impact, dependency risk, and delivery confidence — not gut feel or stakeholder pressure.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-index">PILLAR 04</div>
+      <h3>Requirement framing</h3>
+      <p>AI-assisted user story generation with acceptance criteria derived from signal data. Sprint-ready output that engineering can act on without three rounds of clarification.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-index">PILLAR 05</div>
+      <h3>Feedback integration</h3>
+      <p>Sprint retrospective data, defect escapes, and velocity metrics feed back into the signal model — so the framework learns from every cycle.</p>
+    </div>
+  </div>
+
+  <div class="orch-block">
+    <div class="orch-label">Orchestration layer</div>
+    <p>All five pillars are coordinated by a six-agent orchestrator — a central AI layer that manages context handoff between agents, resolves conflicting signals, and produces a unified decision brief for each planning cycle. The orchestrator is what makes prodiq.ai a framework rather than a collection of prompts.</p>
+  </div>
+</section>
+
+<section id="outcome" class="fade-in">
+  <div class="section-eyebrow">Outcomes</div>
+  <h2>Validated across live milestone<br>release cycles in 2026.</h2>
+  <p class="section-intro">prodiq.ai was built and deployed inside Astro Malaysia — not in a sandbox — across a multi-vendor platform serving 5.3 million subscribers.</p>
+
+  <div class="outcome-story">
+    <div class="outcome-story-headline">Better decisions.<br>Faster cycles. Fewer surprises.</div>
+    <p>Across 2026 milestone planning cycles, prodiq.ai reduced the time from backlog review to sprint-ready commitment, surfaced dependency conflicts before they became sprint blockers, and contributed to a measurable 30% reduction in escaped defects alongside buktiq.ai.</p>
+
+    <div class="compare-row">
+      <div class="compare-col before">
+        <div class="compare-label">Before prodiq.ai</div>
+        <ul>
+          <li>Priorities set in planning meetings by loudest voice</li>
+          <li>Dependency conflicts discovered mid-sprint</li>
+          <li>User stories written from memory and assumption</li>
+          <li>Sprint commitments broken by undetected blockers</li>
+          <li>Context lost between planning cycles</li>
+        </ul>
+      </div>
+      <div class="compare-col after">
+        <div class="compare-label">With prodiq.ai</div>
+        <ul>
+          <li>Evidence-backed priority ranking before planning</li>
+          <li>Dependency chains mapped and resolved upfront</li>
+          <li>AI-assisted user stories with acceptance criteria</li>
+          <li>Sprint commitments grounded in signal data</li>
+          <li>Institutional product memory across cycles</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sibling-bar fade-in">
+  <div class="sibling-inner">
+    <div class="sibling-text">
+      <strong>Part of a broader AI-augmented delivery system</strong>
+      <p>prodiq.ai works alongside buktiq.ai — an AI-augmented enterprise QA framework that handles signal analysis, root cause investigation, and evidence packaging for the same platform. Together, they cover the full delivery loop: from product decision to quality outcome.</p>
+    </div>
+    <a href="buktiq-ai-product-page.html" class="sibling-link">View buktiq.ai →</a>
+  </div>
+</div>
+
+<section id="about" class="fade-in">
+  <div class="section-eyebrow">About</div>
+  <h2>Built by a practitioner,<br>not a research project.</h2>
+
+  <div class="about-block">
+    <div class="about-text">
+      <p>prodiq.ai is a self-initiated AI framework developed by Peter Koay, AVP of Product Management & Delivery at Astro Malaysia — under real resource constraints, on a live multi-vendor platform serving 5.3 million subscribers.</p>
+      <p>It was not designed in a lab or built for a slide deck. It runs alongside 2 embedded Linux STB platforms and 10+ OTT streaming partners, and has been validated across a few milestone release cycles since the beginning of 2026.</p>
+      <p>The framework is part of a broader AI-augmented delivery initiative that also includes buktiq.ai — a parallel framework for AI-augmented enterprise QA.</p>
+      <div class="about-tags">
+        <span class="tag">AI Product Management</span>
+        <span class="tag">Multi-agent orchestration</span>
+        <span class="tag">Consumer electronics</span>
+        <span class="tag">OTT platforms</span>
+        <span class="tag">Sprint planning</span>
+        <span class="tag">Embedded Linux</span>
+        <span class="tag">STB platform</span>
+      </div>
+    </div>
+
+    <div class="about-meta">
+      <div class="meta-row">
+        <span class="meta-key">Architect</span>
+        <span class="meta-val">Peter Koay Wee Jin</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Role</span>
+        <span class="meta-val">AVP, Product Management & Delivery — Astro Malaysia</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Scale</span>
+        <span class="meta-val">5.3 million subscribers</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Status</span>
+        <span class="meta-val">Active — 2026 milestone cycles</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Sibling framework</span>
+        <span class="meta-val"><a href="buktiq-ai-product-page.html">buktiq.ai</a></span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">LinkedIn</span>
+        <span class="meta-val"><a href="https://www.linkedin.com/in/peterkoay" target="_blank" rel="noopener">linkedin.com/in/peterkoay</a></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>prodiq.ai is an independent AI-augmented product management framework developed by Peter Koay.<br>
+  Built at Astro Malaysia. All outcomes reflect internal production data.<br>
+  <a href="https://www.linkedin.com/in/peterkoay" target="_blank" rel="noopener">Connect on LinkedIn</a></p>
+</footer>
+
+<script>
+  const items = ['item1','item2','item3','item4'];
+  items.forEach(id => { document.getElementById(id).style.opacity = '0'; });
+
+  let i = 0;
+  function revealItem() {
+    if (i < items.length) {
+      const el = document.getElementById(items[i]);
+      el.style.opacity = '1';
+      i++;
+      setTimeout(revealItem, 350);
+    } else {
+      setTimeout(() => {
+        document.getElementById('badge-thinking').style.opacity = '0';
+        document.getElementById('badge-done').style.opacity = '1';
+        document.getElementById('insight').style.opacity = '1';
+      }, 300);
+    }
+  }
+  setTimeout(revealItem, 500);
+
+  const faders = document.querySelectorAll('.fade-in');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  faders.forEach(f => obs.observe(f));
+</script>
+</body>
+</html>
